@@ -21,7 +21,7 @@ def read_files(connection, path: str):
         print("uploaded navigational status")
         countryIds = country_creator(connection, clean_ais_data.copy())
         print("uploaded countries")
-        vessel = vessel_creator(connection, clean_ais_data.copy(), ship_type, countryIds)
+        vessel_creator(connection, clean_ais_data.copy(), ship_type, countryIds)
         print("uploaded vessels")
         ais_message_creator(connection, clean_ais_data.copy(), mobile_type, navigational_status)
         print("uploaded ais messages")
