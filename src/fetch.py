@@ -2,9 +2,11 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 
+CHUNK_SIZE=10000000
+
 def read_files(connection, path: str):
     ais_data = parse_csv(path)
-    print("read csv")
+    print("parsed csv file")
 
     for i, ais_data_chunk in enumerate(ais_data):
         print(f" -- Processing chunk {i + 1} -- ")
@@ -69,7 +71,7 @@ def clean_db(connection):
     connection.commit()
 
 def parse_csv(file_path) -> pd.DataFrame:
-    return pd.read_csv(file_path, compression='zip', sep=',', chunksize=10000000)
+    return pd.read_csv(file_path, compression='zip', sep=',', chunksize=CHUNK_SIZE)
 
 def clean_data(ais_data : pd.DataFrame):
     data = clean_position(ais_data)
