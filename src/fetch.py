@@ -30,8 +30,44 @@ def read_files(connection, path: str):
         
     print(f" -- Processing of file complete -- ")
 
+    print(f" -- Final DB cleaning -- ")
+    clean_db(connection)
+
+def clean_db(connection):
+    cur = connection.cursor()
+
+    cur.execute("""
+        DELETE
+        FROM ais_message
+        WHERE ctid IN
+        (
+            SELECT ctid
+            FROM(
+                SELECT
+                    *,
+                    ctid,
+                    row_number() OVER (PARTITION BY timestamp, vessel_mmsi ORDER BY ctid)
+                FROM ais_message
+            )s
+            WHERE row_number >= 2
+        )
+    """)
+
+    cur.execute("""CREATE TEMP TABLE tmp_table ON COMMIT DROP
+    AS SELECT mmsi, ST_RemoveRepeatedPoints(trajectory) AS trajectory
+    FROM vessel_trajectory""")
+
+    cur.execute("""
+        UPDATE vessel_trajectory
+        SET trajectory = tt.trajectory
+        FROM tmp_table tt
+        WHERE vessel_trajectory.mmsi = tt.mmsi
+    """)
+
+    connection.commit()
+
 def parse_csv(file_path) -> pd.DataFrame:
-    return pd.read_csv(file_path, compression='zip', sep=',', chunksize=1000000)
+    return pd.read_csv(file_path, compression='zip', sep=',', chunksize=10000000)
 
 def clean_data(ais_data : pd.DataFrame):
     data = clean_position(ais_data)
