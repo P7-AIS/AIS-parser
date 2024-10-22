@@ -30,8 +30,10 @@ def read_files(connection, path: str):
         
     print(f" -- Processing of file complete -- ")
 
-    print(f" -- Final DB cleaning -- ")
+    print(f" -- Final DB cleaning (remove duplicate AIS messages and trajectories) -- ")
     clean_db(connection)
+    print(f" -- DB cleaning completed -- ")
+    
 
 def clean_db(connection):
     cur = connection.cursor()
